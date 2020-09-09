@@ -108,6 +108,8 @@ ssh into utiliy vm
 curl 10.10.20.2
 curl 10.10.30.2
 
+https://cloud.google.com/load-balancing/docs/internal/setting-up-internal
+
 Configure the internal load balancer
 Name: my-ilb
 TCP Load Balancing > Only between my VMs
