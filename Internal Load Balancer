@@ -12,9 +12,9 @@ Target tags     :	backend-service
 Source filter	:     IP Ranges
 Source IP ranges    :	10.10.0.0/16
 Protocols and ports	:   Allow all
-
+```diff
 gcloud compute firewall-rules create fw-allow-lb-access --direction=INGRESS --priority=1000 --network=my-internal-app --action=ALLOW --rules=all --source-ranges=10.10.0.0/16 --target-tags=backend-service
-
+```
 
 Create the health check rule
 Name	       :   fw-allow-health-checks
