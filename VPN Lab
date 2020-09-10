@@ -1,0 +1,52 @@
+## Elastic Google Cloud Infrastructure
+
+### Scaling and Automation
+
+##vpc already created
+#Virtual Private Networks (VPN)
+#vpn-network-1
+
+subnet-a 10.5.4.2 34.123.62.69
+
+#vpn-network-2
+
+subnet-b  10.1.3.2 35.187.78.220
+
+###
+
+Reserving Static ip using cli
+Name : vpn-1-static-ip 
+Region : us-central1
+`gcloud compute addresses create vpn-1-static-ip --region=us-central1`
+#reserved IP [34.70.151.218]
+
+Name: vpn-2-static-ip 
+Region: europe-west1
+`gcloud compute addresses create vpn-2-static-ip --region=europe-west1`
+#reserved IP [35.195.35.177]
+
+Create VPN, Tunnels, Forwarding Rules & Routes
+#vpn1
+`gcloud compute target-vpn-gateways create "vpn-1" --region "us-central1" --network "vpn-network-1"`
+`gcloud compute forwarding-rules create "vpn-1-rule-esp" --region "us-central1" --address "34.70.151.218" --ip-protocol "ESP" --target-vpn-gateway "vpn-1"`
+`gcloud compute forwarding-rules create "vpn-1-rule-udp500" --region "us-central1" --address "34.70.151.218" --ip-protocol "UDP" --ports "500" --target-vpn-gateway "vpn-1"`
+`gcloud compute forwarding-rules create "vpn-1-rule-udp4500" --region "us-central1" --address "34.70.151.218" --ip-protocol "UDP" --ports "4500" --target-vpn-gateway "vpn-1"`
+`gcloud compute vpn-tunnels create "tunnelt1to2" --region "us-central1" --peer-address "35.195.35.177" --shared-secret "gcprocks" --ike-version "2" --local-traffic-selector "0.0.0.0/0" --target-vpn-gateway "vpn-1"`
+`gcloud compute routes create "tunnelt1to2-route-1" --network "vpn-network-1" --next-hop-vpn-tunnel "tunnelt1to2" --next-hop-vpn-tunnel-region "us-central1" --destination-range "10.1.3.0/24"`
+
+#vpn2
+`gcloud compute target-vpn-gateways create "vpn-2" --region "europe-west1" --network "vpn-network-2"`
+`gcloud compute forwarding-rules create "vpn-2-rule-esp" --region "europe-west1" --address "35.195.35.177" --ip-protocol "ESP" --target-vpn-gateway "vpn-2"`
+`gcloud compute forwarding-rules create "vpn-2-rule-udp500" --region "europe-west1" --address "35.195.35.177" --ip-protocol "UDP" --ports "500" --target-vpn-gateway "vpn-2"`
+`gcloud compute forwarding-rules create "vpn-2-rule-udp4500" --region "europe-west1" --address "35.195.35.177" --ip-protocol "UDP" --ports "4500" --target-vpn-gateway "vpn-2"`
+`gcloud compute vpn-tunnels create "tunnelt2to1" --region "europe-west1" --peer-address "34.70.151.218" --shared-secret "gcprocks" --ike-version "2" --local-traffic-selector "0.0.0.0/0" --target-vpn-gateway "vpn-2"`
+`gcloud compute routes create "tunnelt2to1-route-1" --network "vpn-network-2" --next-hop-vpn-tunnel "tunnelt2to1" --next-hop-vpn-tunnel-region "europe-west1" --destination-range "10.5.4.0/24"`
+
+Shut down an Instance : server-1	
+Edit and set external IP to none
+#stop instance
+`gcloud compute instances stop server-1 --zone=europe-west1-b`
+#set external ip to none
+`gcloud compute instances delete-access-config server1 --zone=us-central1-a`
+#start the instance
+`gcloud compute instances start server-1 --zone=europe-west1-bElastic Google Cloud Infrastructure: Scaling and Automation`
