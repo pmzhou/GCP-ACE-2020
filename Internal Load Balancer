@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html>
-<body>
 Course Name: Elastic Google Cloud Infrastructure: Scaling and Automation
 
 Module : Configuring an Internal Load Balancer
@@ -50,10 +47,10 @@ Subnetwork	:    subnet-a
 Network tags	:   backend-service
 External IP	:   None
 
-gcloud beta compute instance-templates create instance-template-1 --machine-type=e2-medium --subnet=subnet-a --no-address --metadata=startup-script-url=gs://cloud-training/gcpnet/ilb/startup.sh --region=us-central1 --tags=backend-service --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=instance-template-1 --no-shielded-secure-boot --no-shielded-vtpm --no-shielded-integrity-monitoring --reservation-affinity=any
+gcloud compute instance-templates create instance-template-1 --machine-type=e2-medium --subnet=subnet-a --no-address --metadata=startup-script-url=gs://cloud-training/gcpnet/ilb/startup.sh --region=us-central1 --tags=backend-service --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=instance-template-1 
 
-Second INstance Template for Subnet-b
-gcloud beta compute instance-templates create instance-template-2 --machine-type=e2-medium --subnet=subnet-b --no-address --metadata=startup-script-url=gs://cloud-training/gcpnet/ilb/startup.sh --region=us-central1 --tags=backend-service --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=instance-template-1 --no-shielded-secure-boot --no-shielded-vtpm --no-shielded-integrity-monitoring --reservation-affinity=any
+Second Instance Template for Subnet-b
+gcloud compute instance-templates create instance-template-2 --machine-type=e2-medium --subnet=subnet-b --no-address --metadata=startup-script-url=gs://cloud-training/gcpnet/ilb/startup.sh --region=us-central1 --tags=backend-service --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=instance-template-1 
 
 Create the managed instance groups
 Name	   :   instance-group-1
@@ -102,7 +99,7 @@ Primary internal IP :	Ephemeral (Custom)
 Custom ephemeral IP address :	10.10.20.50
 External IP	:   None
 
-gcloud beta compute --project=qwiklabs-gcp-02-c609f67787d1 instances create utility-vm --zone=us-central1-f --machine-type=f1-micro --subnet=subnet-a --no-address --maintenance-policy=MIGRATE --service-account=154221206256-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=utility-vm --no-shielded-secure-boot --no-shielded-vtpm --no-shielded-integrity-monitoring --reservation-affinity=any
+gcloud compute instances create utility-vm --zone=us-central1-f --machine-type=f1-micro --subnet=subnet-a --no-address --maintenance-policy=MIGRATE --service-account=154221206256-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --image=debian-10-buster-v20200902 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=utility-vm 
 
 ssh into utiliy vm
 curl 10.10.20.2
@@ -113,7 +110,8 @@ https://cloud.google.com/load-balancing/docs/internal/setting-up-internal
 Configure the internal load balancer
 Name: my-ilb
 TCP Load Balancing > Only between my VMs
-
+gcloud compute forwarding-rules create nginx-lb --port-range 80 --target-pool my-internal-app
+    
 Configure Backend
 Region  :	us-central1
 Network	    :my-internal-app
@@ -123,18 +121,24 @@ Region	us-central1
 Network	my-internal-app
 Instance group	instance-group-2 (us-central1-b)
 
+gcloud compute backend-services create be-ilb --load-balancing-scheme=internal --protocol=tcp --region=us-central1 --health-checks=my-ilb-health-check \
+    --health-checks-region=us-central1
+    
 Healthchecks
 Name    :	my-ilb-health-check
 Protocol    :	TCP
 Port	   :   80
 
+gcloud compute health-checks create tcp my-ilb-health-check --region=us-central1 --port=80
+
 Configure the frontend
 Subnetwork	:    subnet-b
+
+
 Internal IP	    :   Reserve a static internal IP address
 
 Name	   :   my-ilb-ip
 Static IP address   :  	Let me choose
 Custom IP address   :	10.10.30.5
 Ports : 80
-</body>
-</html>
+
