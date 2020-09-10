@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="favicon.png">
+    <title>VPN Lab</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <!--[if lt IE 9]>
+            <p class="browsehappy">You are using an
+                <strong>outdated</strong>browser. Please
+                <a href="http://browsehappy.com/">upgrade your browser</a>to improve your experience.</p>
+        <![endif]-->
+</head>
+
+<body>
+<h2>Elastic Google Cloud Infrastructure</h2>
+<h3>Scaling and Automation</h3>
+<p>##vpc already created
+#Virtual Private Networks (VPN)
+#vpn-network-1</p>
+<p>subnet-a 10.5.4.2 34.123.62.69</p>
+<p>#vpn-network-2</p>
+<p>subnet-b  10.1.3.2 35.187.78.220</p>
+<p>###</p>
+<p>Reserving Static ip using cli
+Name : vpn-1-static-ip 
+Region : us-central1
+<code>gcloud compute addresses create vpn-1-static-ip --region=us-central1</code>
+#reserved IP [34.70.151.218]</p>
+<p>Name: vpn-2-static-ip 
+Region: europe-west1
+<code>gcloud compute addresses create vpn-2-static-ip --region=europe-west1</code>
+#reserved IP [35.195.35.177]</p>
+<p>Create VPN, Tunnels, Forwarding Rules &amp; Routes
+#vpn1
+<code>gcloud compute target-vpn-gateways create &quot;vpn-1&quot; --region &quot;us-central1&quot; --network &quot;vpn-network-1&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-1-rule-esp&quot; --region &quot;us-central1&quot; --address &quot;34.70.151.218&quot; --ip-protocol &quot;ESP&quot; --target-vpn-gateway &quot;vpn-1&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-1-rule-udp500&quot; --region &quot;us-central1&quot; --address &quot;34.70.151.218&quot; --ip-protocol &quot;UDP&quot; --ports &quot;500&quot; --target-vpn-gateway &quot;vpn-1&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-1-rule-udp4500&quot; --region &quot;us-central1&quot; --address &quot;34.70.151.218&quot; --ip-protocol &quot;UDP&quot; --ports &quot;4500&quot; --target-vpn-gateway &quot;vpn-1&quot;</code>
+<code>gcloud compute vpn-tunnels create &quot;tunnelt1to2&quot; --region &quot;us-central1&quot; --peer-address &quot;35.195.35.177&quot; --shared-secret &quot;gcprocks&quot; --ike-version &quot;2&quot; --local-traffic-selector &quot;0.0.0.0/0&quot; --target-vpn-gateway &quot;vpn-1&quot;</code>
+<code>gcloud compute routes create &quot;tunnelt1to2-route-1&quot; --network &quot;vpn-network-1&quot; --next-hop-vpn-tunnel &quot;tunnelt1to2&quot; --next-hop-vpn-tunnel-region &quot;us-central1&quot; --destination-range &quot;10.1.3.0/24&quot;</code></p>
+<p>#vpn2
+<code>gcloud compute target-vpn-gateways create &quot;vpn-2&quot; --region &quot;europe-west1&quot; --network &quot;vpn-network-2&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-2-rule-esp&quot; --region &quot;europe-west1&quot; --address &quot;35.195.35.177&quot; --ip-protocol &quot;ESP&quot; --target-vpn-gateway &quot;vpn-2&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-2-rule-udp500&quot; --region &quot;europe-west1&quot; --address &quot;35.195.35.177&quot; --ip-protocol &quot;UDP&quot; --ports &quot;500&quot; --target-vpn-gateway &quot;vpn-2&quot;</code>
+<code>gcloud compute forwarding-rules create &quot;vpn-2-rule-udp4500&quot; --region &quot;europe-west1&quot; --address &quot;35.195.35.177&quot; --ip-protocol &quot;UDP&quot; --ports &quot;4500&quot; --target-vpn-gateway &quot;vpn-2&quot;</code>
+<code>gcloud compute vpn-tunnels create &quot;tunnelt2to1&quot; --region &quot;europe-west1&quot; --peer-address &quot;34.70.151.218&quot; --shared-secret &quot;gcprocks&quot; --ike-version &quot;2&quot; --local-traffic-selector &quot;0.0.0.0/0&quot; --target-vpn-gateway &quot;vpn-2&quot;</code>
+<code>gcloud compute routes create &quot;tunnelt2to1-route-1&quot; --network &quot;vpn-network-2&quot; --next-hop-vpn-tunnel &quot;tunnelt2to1&quot; --next-hop-vpn-tunnel-region &quot;europe-west1&quot; --destination-range &quot;10.5.4.0/24&quot;</code></p>
+<p>Shut down an Instance : server-1	
+Edit and set external IP to none
+#stop instance
+<code>gcloud compute instances stop server-1 --zone=europe-west1-b</code>
+#set external ip to none
+<code>gcloud compute instances delete-access-config server1 --zone=us-central1-a</code>
+#start the instance
+<code>gcloud compute instances start server-1 --zone=europe-west1-bElastic Google Cloud Infrastructure: Scaling and Automation</code></p>
+</body>
+
+</html>
